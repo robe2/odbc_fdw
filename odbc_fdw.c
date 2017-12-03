@@ -947,7 +947,7 @@ odbc_table_size(PG_FUNCTION_ARGS)
   unsigned int tableSize;
   List *tableOptions = NIL;
   Node *val = (Node *) makeString(tableName);
-#if PG_VERSION_NUM >= 10000
+#if PG_VERSION_NUM >= 100000
   DefElem *elem = (DefElem *) makeDefElem(defname, val, -1);
 #else
   DefElem *elem = (DefElem *) makeDefElem(defname, val);
@@ -971,7 +971,7 @@ odbc_query_size(PG_FUNCTION_ARGS)
   unsigned int querySize;
   List *queryOptions = NIL;
   Node *val = (Node *) makeString(sqlQuery);
-#if PG_VERSION_NUM >= 10000
+#if PG_VERSION_NUM >= 100000
   DefElem *elem = (DefElem *) makeDefElem(defname, val, -1);
 #else
   DefElem *elem = (DefElem *) makeDefElem(defname, val);
