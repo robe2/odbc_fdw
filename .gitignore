@@ -1,6 +1,9 @@
 # Generated subdirectories
 .DS_Store
 test/results/
+*.a
+*.dll
+*.dylib
 **/*.o
 **/*.so
 test/regression.diffs
