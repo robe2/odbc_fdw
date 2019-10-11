@@ -61,6 +61,10 @@
 #include "access/table.h"
 #endif
 
+#if defined(_WIN32)
+#define strcasecmp _stricmp
+#endif
+
 /* TupleDescAttr was backported into 9.5.9 and 9.6.5 but we support any 9.5.X */
 #ifndef TupleDescAttr
 #define TupleDescAttr(tupdesc, i) ((tupdesc)->attrs[(i)])
