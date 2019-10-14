@@ -6,14 +6,23 @@ platform: x64
 clone_depth: 1
 services:
   - mysql
+  - mssql2017
 environment:
   PGUSER: postgres
   PGPASSWORD: Password12!
+  MYSQL_PWD: Password12!
+  SQLCMDPASSWORD: Password12!
   matrix:
   - pg: 11.5-2
     PlatformToolset: v140
   - pg: 12.0-1
     PlatformToolset: v141
+  - pg: master
+    PlatformToolset: v141
+    configuration: Debug
+matrix:
+  allow_failures:
+    - pg: master
 
 init: # Make %exe% available for caching
 - ps: |
@@ -86,7 +95,7 @@ test_script:
       pg_ctl register -S demand -N "postgresql$env:x64-$env:pgversion" -D c:\pgdata
     }
     Start-Service postgresql$env:x64-$env:pgversion
-#    &  .\test\appveyor_tests.ps1
+    & .\test\appveyor_tests.ps1
 
 artifacts:
 - path: '*.zip'
@@ -100,3 +109,6 @@ deploy:
       secure: QR7uEDoDDcUclQhaQDdbymUotMh1Gq++D+ljzKGC4a1Y9hr6BszPYRcLy9i0HJ/k
     on:
       appveyor_repo_tag: true       # deploy on tag push only
+
+# on_finish:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
