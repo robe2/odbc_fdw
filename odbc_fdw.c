@@ -177,11 +177,11 @@ typedef enum { TEXT_CONVERSION, HEX_CONVERSION, BIN_CONVERSION, BOOL_CONVERSION 
 /*
  * SQL functions
  */
-extern Datum odbc_fdw_handler(PG_FUNCTION_ARGS);
-extern Datum odbc_fdw_validator(PG_FUNCTION_ARGS);
-extern Datum odbc_tables_list(PG_FUNCTION_ARGS);
-extern Datum odbc_table_size(PG_FUNCTION_ARGS);
-extern Datum odbc_query_size(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum odbc_fdw_handler(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum odbc_fdw_validator(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum odbc_tables_list(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum odbc_table_size(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum odbc_query_size(PG_FUNCTION_ARGS);
 
 PG_FUNCTION_INFO_V1(odbc_fdw_handler);
 PG_FUNCTION_INFO_V1(odbc_fdw_validator);
