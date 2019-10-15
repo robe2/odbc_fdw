@@ -2155,7 +2155,11 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 		int option_count = 0;
 		const char *prefix = empty_string_if_null(options.prefix);
 
+#if PG_VERSION_NUM >= 130000
+		table_columns_cell = lnext(table_columns, table_columns_cell);
+#else
 		table_columns_cell = lnext(table_columns_cell);
+#endif
 
 		initStringInfo(&create_statement);
 		appendStringInfo(&create_statement, "CREATE FOREIGN TABLE \"%s\".\"%s%s\" (", stmt->local_schema, prefix, (char *) table_name);
