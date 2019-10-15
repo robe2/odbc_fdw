@@ -17,6 +17,7 @@ wget --quiet --directory-prefix=/opt http://archive.apache.org/dist/hive/hive-${
 tar -xzf /opt/hadoop-${HADOOP_VERSION}.tar.gz -C /opt
 tar -xzf /opt/apache-hive-${HIVE_VERSION}-bin.tar.gz -C /opt
 sed -i -- 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g' ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
+${HADOOP_HOME}/bin/hdfs dfs namenode -format
 ${HADOOP_HOME}/bin/hdfs dfs -mkdir /tmp/warehouse
 ${HADOOP_HOME}/bin/hdfs dfs -chmod g+w /tmp/warehouse
 ${HADOOP_HOME}/bin/hdfs dfs -mkdir /tmp/warehouse/fdw_tests
