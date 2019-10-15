@@ -31,7 +31,7 @@ addons:
     - mysql-server-5.7
     - unixodbc-dev
     - odbcinst         # ODBC core
-    - odbc-postgresql=1:09.02.0100-2ubuntu1  # PgSQL ODBC
+    - odbc-postgresql  # PgSQL ODBC
     - libmyodbc        # MySQL ODBC
     - freetds # Custom package to use freetds >= 1.x in trusty
 
