@@ -2040,6 +2040,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 						 * in that case we must avoid using an schema to query the table columns.
 						 */
 						schema_name = NULL;
+						missing_foreign_schema = false;
 					}
 
 					/* Since we haven't specified SQL_ALL_CATALOGS in the
