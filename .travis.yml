@@ -47,6 +47,8 @@ before_install:
   - sudo bash $TRAVIS_BUILD_DIR/test/scripts/ci/install_postgres.sh
   # Install Hive (sudos in script as needed)
   - bash $TRAVIS_BUILD_DIR/test/scripts/ci/install_hive.sh
+  # Starting up MySQL
+  - service mysql start
   # ODBC installation ini file
   - sudo cp $TRAVIS_BUILD_DIR/test/scripts/ci/odbcinst.ini /etc
 
