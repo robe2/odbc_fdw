@@ -7,10 +7,11 @@
 # HIVE_HOME
 # HIVE_VERSION
 
-# authorizes ssh to localhost in xenial
+# authorizes ssh to localhost and 0.0.0.0 in Xenial
 ssh-keygen -t rsa -f ~/.ssh/id_rsa -N "" -q
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ssh-keyscan -t rsa localhost >> ~/.ssh/known_hosts
+ssh-keyscan -t rsa 0.0.0.0 >> ~/.ssh/known_hosts
 cat << EOF >> ~/.ssh/config
 Host localhost
      IdentityFile ~/.ssh/id_rsa
