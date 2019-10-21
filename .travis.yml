@@ -20,6 +20,7 @@ matrix:
     - env: POSTGRESQL_VERSION=9.6
     - env: POSTGRESQL_VERSION=10
     - env: POSTGRESQL_VERSION=11
+    - env: POSTGRESQL_VERSION=12
 
 addons:
   apt:
