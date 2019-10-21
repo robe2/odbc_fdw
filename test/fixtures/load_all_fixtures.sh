@@ -39,7 +39,7 @@ load_all()
     load_hive_fixtures $BASEDIR
     load_postgres_fixtures $BASEDIR
     load_mysql_fixtures $BASEDIR
-    load_sqlserver_fixtures $BASEDIR
+    #load_sqlserver_fixtures $BASEDIR
 }
 
 load_all

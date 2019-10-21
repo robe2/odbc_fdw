@@ -26,12 +26,12 @@ addons:
     sources:
       - sourceline: 'ppa:cartodb/odbc'
     packages:
-    - mysql-server-core-5.6
-    - mysql-client-5.6
-    - mysql-server-5.6
+    - mysql-server-core-5.7
+    - mysql-client-5.7
+    - mysql-server-5.7
     - unixodbc-dev
     - odbcinst         # ODBC core
-    - odbc-postgresql=1:09.02.0100-2ubuntu1  # PgSQL ODBC
+    - odbc-postgresql  # PgSQL ODBC
     - libmyodbc        # MySQL ODBC
     - freetds # Custom package to use freetds >= 1.x in trusty
 
@@ -47,6 +47,8 @@ before_install:
   - sudo bash $TRAVIS_BUILD_DIR/test/scripts/ci/install_postgres.sh
   # Install Hive (sudos in script as needed)
   - bash $TRAVIS_BUILD_DIR/test/scripts/ci/install_hive.sh
+  # Starting up MySQL
+  - sudo service mysql start
   # ODBC installation ini file
   - sudo cp $TRAVIS_BUILD_DIR/test/scripts/ci/odbcinst.ini /etc
 
