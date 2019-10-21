@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+Released XXXX-XX-XX
+
+Changes:
+- Update CI dependencies (https://github.com/CartoDB/odbc_fdw/pull/102).
+- PG 12 compatibility (https://github.com/CartoDB/odbc_fdw/pull/104).
+
 ## 0.4.0
 Released 2019-01-29
 
