@@ -60,6 +60,7 @@ install:
 
 cache:
 - '%exe%'
+- psqlodbc_x64.msi
 
 build_script:
 - msbuild /p:PlatformToolset=%PlatformToolset% /p:configuration=%CONFIGURATION% /p:platform=%PLATFORM%

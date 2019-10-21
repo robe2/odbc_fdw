@@ -57,6 +57,13 @@ $env:Path += ";C:\Program Files\MySQL\MySQL Server 5.7\bin"
 & sqlcmd -S "(local)\SQL2017" -U "sa" -d master -i "$PSScriptRoot\fixtures\sqlserver_fixtures.sql"
 Rename-Item -Path "$PSScriptRoot\sql\sqlserver_20_query_test_disabled.sql" -NewName "sqlserver_20_query_test.sql"
 
+if (-not (Test-Path "$PSScriptRoot\..\psqlodbc_x64.msi")) {
+  Start-FileDownload "https://ftp.postgresql.org/pub/odbc/versions/msi/psqlodbc_12_00_0000-x64.zip"
+  Expand-Archive -LiteralPath psqlodbc_12_00_0000-x64.zip -DestinationPath .
+  Remove-Item psqlodbc_12_00_0000-x64.zip
+}
+& msiexec /i psqlodbc_x64.msi /qn /quiet
+
 Add-AppveyorTest Regression -Framework pg_regress -FileName sql\ -Outcome Running
 $env:Outcome="Passed"
 $elapsed=(Measure-Command {
