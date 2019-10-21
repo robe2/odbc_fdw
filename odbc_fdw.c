@@ -53,6 +53,14 @@
 
 #include "access/tupdesc.h"
 
+#if PG_VERSION_NUM < 120000
+#include "access/heapam.h"
+#define table_open heap_open
+#define table_close heap_close
+#else
+#include "access/table.h"
+#endif
+
 /* TupleDescAttr was backported into 9.5.9 and 9.6.5 but we support any 9.5.X */
 #ifndef TupleDescAttr
 #define TupleDescAttr(tupdesc, i) ((tupdesc)->attrs[(i)])
@@ -1356,7 +1364,7 @@ odbcBeginForeignScan(ForeignScanState *node, int eflags)
 	}
 
 	/* Fetch the table column info */
-	rel = heap_open(RelationGetRelid(node->ss.ss_currentRelation), AccessShareLock);
+	rel = table_open(RelationGetRelid(node->ss.ss_currentRelation), AccessShareLock);
 	num_of_columns = rel->rd_att->natts;
 	columns = (StringInfoData *) palloc(sizeof(StringInfoData) * num_of_columns);
 	initStringInfo(&col_str);
@@ -1391,7 +1399,7 @@ odbcBeginForeignScan(ForeignScanState *node, int eflags)
 			columns[i] = col;
 		appendStringInfo(&col_str, i == 0 ? "%s%s%s" : ",%s%s%s", (char *) quote_char.data, columns[i].data, (char *) quote_char.data);
 	}
-	heap_close(rel, NoLock);
+	table_close(rel, NoLock);
 
 	/* See if we've got a qual we can push down */
 	if (node->ss.ps.plan->qual)
@@ -1755,7 +1763,11 @@ odbcIterateForeignScan(ForeignScanState *node)
 		}
 
 		tuple = BuildTupleFromCStrings(festate->attinmeta, values);
+#if PG_VERSION_NUM < 120000
 		ExecStoreTuple(tuple, slot, InvalidBuffer, false);
+#else
+		ExecStoreHeapTuple(tuple, slot, false);
+#endif
 		pfree(values);
 	}
 
