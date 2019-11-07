@@ -1,7 +1,7 @@
 ODBC FDW for PostgreSQL 9.5+ 
 ============================
 [![Travis Build Status](https://travis-ci.org/CartoDB/odbc_fdw.svg?branch=master)](https://travis-ci.org/CartoDB/odbc_fdw)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/CartoDB/odbc_fdw?branch=master&svg=true)](https://ci.appveyor.com/project/CartoDB/odbc-fdw "Get your fresh Windows build here!")
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/CartoDB/odbc_fdw?branch=master&svg=true)](https://ci.appveyor.com/project/alberhander/odbc-fdw "Get your fresh Windows build here!")
 
 This PostgreSQL extension implements a Foreign Data Wrapper (FDW) for
 remote databases using Open Database Connectivity [ODBC](http://msdn.microsoft.com/en-us/library/ms714562(v=VS.85).aspx).
