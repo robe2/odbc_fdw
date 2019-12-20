@@ -127,6 +127,7 @@ typedef struct odbcFdwExecutionState
 {
 	AttInMetadata   *attinmeta;
 	odbcFdwOptions  options;
+	SQLHDBC					dbc;
 	SQLHSTMT        stmt;
 	int             num_of_result_cols;
 	int             num_of_table_cols;
@@ -896,6 +897,8 @@ odbcGetTableSize(odbcFdwOptions* options, unsigned int *size)
 	if (dbc)
 	{
 		SQLFreeHandle(SQL_HANDLE_DBC, dbc);
+		SQLDisconnect(dbc);
+		elog_debug("close connection");
 		dbc = NULL;
 	}
 	if (env)
@@ -903,8 +906,6 @@ odbcGetTableSize(odbcFdwOptions* options, unsigned int *size)
 		SQLFreeHandle(SQL_HANDLE_ENV, env);
 		env = NULL;
 	}
-	if (dbc)
-		SQLDisconnect(dbc);
 }
 
 static int strtoint(const char *nptr, char **endptr, int base)
@@ -1466,6 +1467,7 @@ odbcBeginForeignScan(ForeignScanState *node, int eflags)
 	festate = (odbcFdwExecutionState *) palloc(sizeof(odbcFdwExecutionState));
 	festate->attinmeta = TupleDescGetAttInMetadata(node->ss.ss_currentRelation->rd_att);
 	copy_odbcFdwOptions(&(festate->options), &options);
+	festate->dbc = dbc;
 	festate->stmt = stmt;
 	festate->table_columns = columns;
 	festate->num_of_table_cols = num_of_columns;
@@ -1824,6 +1826,13 @@ odbcEndForeignScan(ForeignScanState *node)
 		{
 			SQLFreeHandle(SQL_HANDLE_STMT, festate->stmt);
 			festate->stmt = NULL;
+		}
+		if (festate->dbc)
+		{
+			SQLFreeHandle(SQL_HANDLE_DBC, festate->dbc);
+			SQLDisconnect(festate->dbc);
+			festate->dbc = NULL;
+			elog_debug("close connection");
 		}
 	}
 }
