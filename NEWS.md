@@ -4,6 +4,7 @@
 Released XXXX-XX-XX
 
 Changes:
+- Fixes #96 by closing connections (https://github.com/CartoDB/odbc_fdw/pull/116).
 - Update CI dependencies (https://github.com/CartoDB/odbc_fdw/pull/102).
 - PG 12 compatibility (https://github.com/CartoDB/odbc_fdw/pull/104).
 
