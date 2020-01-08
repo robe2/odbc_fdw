@@ -1116,8 +1116,8 @@ Datum odbc_tables_list(PG_FUNCTION_ARGS)
 		datafctx->currentRow = currentRow;
 		SRF_RETURN_NEXT(funcctx, result);
 	} else {
-		odbc_disconnection(&env, &dbc);
 		SRF_RETURN_DONE(funcctx);
+		odbc_disconnection(&env, &dbc);
 	}
 }
 
