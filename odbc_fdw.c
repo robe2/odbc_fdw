@@ -426,16 +426,14 @@ odbc_connection(odbcFdwOptions* options, SQLHENV *env, SQLHDBC *dbc)
 static void
 odbc_disconnection(SQLHENV *env, SQLHDBC *dbc)
 {
-	if (dbc && *dbc)
+	if (*dbc)
 	{
 		SQLFreeHandle(SQL_HANDLE_DBC, *dbc);
 		SQLDisconnect(*dbc);
-		*dbc = NULL;
 	}
-	if (env && *env)
+	if (*env)
 	{
 		SQLFreeHandle(SQL_HANDLE_ENV, *env);
-		*env = NULL;
 	}
 	elog_debug("connection closed <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 }
