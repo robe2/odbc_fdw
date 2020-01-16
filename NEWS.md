@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.5.0
-Released XXXX-XX-XX
+Released 2020-01-16
 
 Changes:
 - Update CI dependencies (https://github.com/CartoDB/odbc_fdw/pull/102).
