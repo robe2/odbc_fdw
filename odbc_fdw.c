@@ -430,95 +430,14 @@ odbc_disconnection(SQLHENV *env, SQLHDBC *dbc)
 
 	if (*dbc)
 	{
-		ret = SQLFreeHandle(SQL_HANDLE_DBC, *dbc);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			SQLINTEGER   i = 0;
-			SQLINTEGER   native;
-			SQLCHAR  state[ 7 ];
-			SQLCHAR  text[256];
-			SQLSMALLINT  len;
-			SQLRETURN    diag_ret;
-			ereport(ERROR,
-			        (errcode(ERRCODE_FDW_ERROR),
-			         errmsg("Error result (%d): FREE SQL HANDLE dbc", ret),
-			         errhint("<none>")
-			        ));
-			do
-			{
-				diag_ret = SQLGetDiagRec(SQL_HANDLE_DBC, *dbc, ++i, state, &native, text,
-																sizeof(text), &len );
-				if (SQL_SUCCEEDED(diag_ret))
-				{
-					ereport(ERROR,
-			        (errcode(ERRCODE_FDW_ERROR),
-			         errmsg(" %s:%ld:%ld:%s\n", state, (long int) i, (long int) native, text),
-			         errhint("<none>")
-			        ));
-				}
-			}
-			while( diag_ret == SQL_SUCCESS );
-		}
 		ret = SQLDisconnect(*dbc);
-		if (!SQL_SUCCEEDED(ret))
+		check_return(ret, "dbc disconnect", *dbc, SQL_HANDLE_DBC);
+		ret = SQLFreeHandle(SQL_HANDLE_DBC, *dbc);
+		check_return(ret, "dbc free handle", *dbc, SQL_HANDLE_DBC);
+		if (*env)
 		{
-			SQLINTEGER   i = 0;
-			SQLINTEGER   native;
-			SQLCHAR  state[ 7 ];
-			SQLCHAR  text[256];
-			SQLSMALLINT  len;
-			SQLRETURN    diag_ret;
-			ereport(ERROR,
-			        (errcode(ERRCODE_FDW_ERROR),
-			         errmsg("Error result (%d): SQL DISCONNECT", ret),
-			         errhint("<none>")
-			        ));
-			do
-			{
-				diag_ret = SQLGetDiagRec(SQL_HANDLE_DBC, *dbc, ++i, state, &native, text,
-																sizeof(text), &len );
-				if (SQL_SUCCEEDED(diag_ret))
-				{
-					ereport(ERROR,
-			        (errcode(ERRCODE_FDW_ERROR),
-			         errmsg(" %s:%ld:%ld:%s\n", state, (long int) i, (long int) native, text),
-			         errhint("<none>")
-			        ));
-				}
-			}
-			while( diag_ret == SQL_SUCCESS );
-		}
-	}
-	if (*env)
-	{
-		ret = SQLFreeHandle(SQL_HANDLE_ENV, *env);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			SQLINTEGER   i = 0;
-			SQLINTEGER   native;
-			SQLCHAR  state[ 7 ];
-			SQLCHAR  text[256];
-			SQLSMALLINT  len;
-			SQLRETURN    diag_ret;
-			ereport(ERROR,
-			        (errcode(ERRCODE_FDW_ERROR),
-			         errmsg("Error result (%d): FREE SQL HANDLE env", ret),
-			         errhint("<none>")
-			        ));
-			do
-			{
-				diag_ret = SQLGetDiagRec(SQL_HANDLE_DBC, *dbc, ++i, state, &native, text,
-																sizeof(text), &len );
-				if (SQL_SUCCEEDED(diag_ret))
-				{
-					ereport(ERROR,
-			        (errcode(ERRCODE_FDW_ERROR),
-			         errmsg(" %s:%ld:%ld:%s\n", state, (long int) i, (long int) native, text),
-			         errhint("<none>")
-			        ));
-				}
-			}
-			while( diag_ret == SQL_SUCCESS );
+			ret = SQLFreeHandle(SQL_HANDLE_ENV, *env);
+			check_return(ret, "env free handle", *env, SQL_HANDLE_ENV);
 		}
 	}
 	elog_debug("connection closed <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
@@ -1104,6 +1023,8 @@ typedef struct {
 typedef struct {
 	Oid serverOid;
 	DataBinding* tableResult;
+	SQLHENV env;
+	SQLHDBC dbc;
 	SQLHSTMT stmt;
 	SQLCHAR schema;
 	SQLCHAR name;
@@ -1167,6 +1088,8 @@ Datum odbc_tables_list(PG_FUNCTION_ARGS)
 
 		datafctx->serverOid = serverOid;
 		datafctx->tableResult = tableResult;
+		datafctx->dbc = dbc;
+		datafctx->env = env;
 		datafctx->stmt = stmt;
 		datafctx->rowLimit = rowLimit;
 		datafctx->currentRow = currentRow;
@@ -1202,7 +1125,7 @@ Datum odbc_tables_list(PG_FUNCTION_ARGS)
 		datafctx->currentRow = currentRow;
 		SRF_RETURN_NEXT(funcctx, result);
 	} else {
-		odbc_disconnection(&env, &dbc);
+		odbc_disconnection(&datafctx->env, &datafctx->dbc);
 		SRF_RETURN_DONE(funcctx);
 	}
 }
