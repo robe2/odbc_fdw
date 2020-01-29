@@ -417,7 +417,7 @@ odbc_connection(odbcFdwOptions* options, SQLHENV *env, SQLHDBC *dbc)
 	ret = SQLDriverConnect(*dbc, NULL, (SQLCHAR *) conn_str.data, SQL_NTS,
 	                       OutConnStr, 1024, &OutConnStrLen, SQL_DRIVER_COMPLETE);
 	check_return(ret, "Connecting to driver", dbc, SQL_HANDLE_DBC);
-	elog_debug("connection opened >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+	elog_debug("Connection opened");
 }
 
 /*
@@ -440,7 +440,7 @@ odbc_disconnection(SQLHENV *env, SQLHDBC *dbc)
 			check_return(ret, "env free handle", *env, SQL_HANDLE_ENV);
 		}
 	}
-	elog_debug("connection closed <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+	elog_debug("Connection closed");
 }
 
 /*
