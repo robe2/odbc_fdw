@@ -27,9 +27,6 @@ addons:
     sources:
       - sourceline: 'ppa:cartodb/odbc'
     packages:
-    - mysql-server-core-5.7
-    - mysql-client-5.7
-    - mysql-server-5.7
     - unixodbc-dev
     - odbcinst         # ODBC core
     - odbc-postgresql  # PgSQL ODBC
