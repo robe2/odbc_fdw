@@ -107,7 +107,7 @@ deploy:
     draft: false
     prerelease: false
     auth_token:
-      secure: QR7uEDoDDcUclQhaQDdbymUotMh1Gq++D+ljzKGC4a1Y9hr6BszPYRcLy9i0HJ/k
+      secure: iABKJh8cHPJuyS1vHu44URWBRQkcivQVFZ0NUpTRFqyMvHuhkv/qLKkB/XqoKpC7
     on:
       appveyor_repo_tag: true       # deploy on tag push only
 
