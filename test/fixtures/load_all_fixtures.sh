@@ -23,6 +23,7 @@ load_postgres_fixtures()
 load_mysql_fixtures()
 {
     load_config "mysql.config"
+    sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$password';"
     echo "create database if not exists fdw_tests" | mysql -u $user
     mysql -u $user -D $dbname < "$BASEDIR/mysql_fixtures.sql"
 }
