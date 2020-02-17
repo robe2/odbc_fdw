@@ -127,6 +127,8 @@ typedef struct odbcFdwExecutionState
 {
 	AttInMetadata   *attinmeta;
 	odbcFdwOptions  options;
+	SQLHENV         env;
+	SQLHDBC         dbc;
 	SQLHSTMT        stmt;
 	int             num_of_result_cols;
 	int             num_of_table_cols;
@@ -214,6 +216,7 @@ static void extract_odbcFdwOptions(List *options_list, odbcFdwOptions *extracted
 static void init_odbcFdwOptions(odbcFdwOptions* options);
 static void copy_odbcFdwOptions(odbcFdwOptions* to, odbcFdwOptions* from);
 static void odbc_connection(odbcFdwOptions* options, SQLHENV *env, SQLHDBC *dbc);
+static void odbc_disconnection(SQLHENV *env, SQLHDBC *dbc);
 static void sql_data_type(SQLSMALLINT odbc_data_type, SQLULEN column_size, SQLSMALLINT decimal_digits, SQLSMALLINT nullable, StringInfo sql_type);
 static void odbcGetOptions(Oid server_oid, List *add_options, odbcFdwOptions *extracted_options);
 static void odbcGetTableOptions(Oid foreigntableid, odbcFdwOptions *extracted_options);
@@ -414,6 +417,30 @@ odbc_connection(odbcFdwOptions* options, SQLHENV *env, SQLHDBC *dbc)
 	ret = SQLDriverConnect(*dbc, NULL, (SQLCHAR *) conn_str.data, SQL_NTS,
 	                       OutConnStr, 1024, &OutConnStrLen, SQL_DRIVER_COMPLETE);
 	check_return(ret, "Connecting to driver", dbc, SQL_HANDLE_DBC);
+	elog_debug("Connection opened");
+}
+
+/*
+ * Close the ODBC connection
+ */
+static void
+odbc_disconnection(SQLHENV *env, SQLHDBC *dbc)
+{
+	SQLRETURN ret;
+
+	if (*dbc)
+	{
+		ret = SQLDisconnect(*dbc);
+		check_return(ret, "dbc disconnect", *dbc, SQL_HANDLE_DBC);
+		ret = SQLFreeHandle(SQL_HANDLE_DBC, *dbc);
+		check_return(ret, "dbc free handle", *dbc, SQL_HANDLE_DBC);
+		if (*env)
+		{
+			ret = SQLFreeHandle(SQL_HANDLE_ENV, *env);
+			check_return(ret, "env free handle", *env, SQL_HANDLE_ENV);
+		}
+	}
+	elog_debug("Connection closed");
 }
 
 /*
@@ -893,18 +920,7 @@ odbcGetTableSize(odbcFdwOptions* options, unsigned int *size)
 		SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 		stmt = NULL;
 	}
-	if (dbc)
-	{
-		SQLFreeHandle(SQL_HANDLE_DBC, dbc);
-		dbc = NULL;
-	}
-	if (env)
-	{
-		SQLFreeHandle(SQL_HANDLE_ENV, env);
-		env = NULL;
-	}
-	if (dbc)
-		SQLDisconnect(dbc);
+	odbc_disconnection(&env, &dbc);
 }
 
 static int strtoint(const char *nptr, char **endptr, int base)
@@ -1007,6 +1023,8 @@ typedef struct {
 typedef struct {
 	Oid serverOid;
 	DataBinding* tableResult;
+	SQLHENV env;
+	SQLHDBC dbc;
 	SQLHSTMT stmt;
 	SQLCHAR schema;
 	SQLCHAR name;
@@ -1070,6 +1088,8 @@ Datum odbc_tables_list(PG_FUNCTION_ARGS)
 
 		datafctx->serverOid = serverOid;
 		datafctx->tableResult = tableResult;
+		datafctx->dbc = dbc;
+		datafctx->env = env;
 		datafctx->stmt = stmt;
 		datafctx->rowLimit = rowLimit;
 		datafctx->currentRow = currentRow;
@@ -1105,6 +1125,7 @@ Datum odbc_tables_list(PG_FUNCTION_ARGS)
 		datafctx->currentRow = currentRow;
 		SRF_RETURN_NEXT(funcctx, result);
 	} else {
+		odbc_disconnection(&datafctx->env, &datafctx->dbc);
 		SRF_RETURN_DONE(funcctx);
 	}
 }
@@ -1466,6 +1487,8 @@ odbcBeginForeignScan(ForeignScanState *node, int eflags)
 	festate = (odbcFdwExecutionState *) palloc(sizeof(odbcFdwExecutionState));
 	festate->attinmeta = TupleDescGetAttInMetadata(node->ss.ss_currentRelation->rd_att);
 	copy_odbcFdwOptions(&(festate->options), &options);
+	festate->env = env;
+	festate->dbc = dbc;
 	festate->stmt = stmt;
 	festate->table_columns = columns;
 	festate->num_of_table_cols = num_of_columns;
@@ -1825,6 +1848,7 @@ odbcEndForeignScan(ForeignScanState *node)
 			SQLFreeHandle(SQL_HANDLE_STMT, festate->stmt);
 			festate->stmt = NULL;
 		}
+		odbc_disconnection(&festate->env, &festate->dbc);
 	}
 }
 
@@ -1977,6 +2001,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 		}
 		SQLCloseCursor(query_stmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, query_stmt);
+		odbc_disconnection(&env, &dbc);
 
 		tables        = lappend(tables, (void*)options.table);
 		table_columns = lappend(table_columns, (void*)col_str.data);
@@ -2075,6 +2100,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 			SQLCloseCursor(tables_stmt);
 
 			SQLFreeHandle(SQL_HANDLE_STMT, tables_stmt);
+			odbc_disconnection(&env, &dbc);
 		}
 		else if (stmt->list_type == FDW_IMPORT_SCHEMA_LIMIT_TO)
 		{
@@ -2088,11 +2114,11 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 		{
 			elog(ERROR,"Unknown list type in IMPORT FOREIGN SCHEMA");
 		}
+
+		odbc_connection(&options, &env, &dbc);
 		foreach(tables_cell, tables)
 		{
 			char *table_name = (char*)lfirst(tables_cell);
-
-			odbc_connection(&options, &env, &dbc);
 
 			/* Allocate a statement handle */
 			SQLAllocHandle(SQL_HANDLE_STMT, dbc, &columns_stmt);
@@ -2141,6 +2167,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 			SQLFreeHandle(SQL_HANDLE_STMT, columns_stmt);
 			table_columns = lappend(table_columns, (void*)col_str.data);
 		}
+		odbc_disconnection(&env, &dbc);
 	}
 
 	/* Generate create statements */

@@ -27,9 +27,6 @@ addons:
     sources:
       - sourceline: 'ppa:cartodb/odbc'
     packages:
-    - mysql-server-core-5.7
-    - mysql-client-5.7
-    - mysql-server-5.7
     - unixodbc-dev
     - odbcinst         # ODBC core
     - odbc-postgresql  # PgSQL ODBC
@@ -48,8 +45,10 @@ before_install:
   - sudo bash $TRAVIS_BUILD_DIR/test/scripts/ci/install_postgres.sh
   # Install Hive (sudos in script as needed)
   - bash $TRAVIS_BUILD_DIR/test/scripts/ci/install_hive.sh
-  # Starting up MySQL
+  # Start & Update MySQL (update using apt addon will fail if mysql not started)
+  - sudo systemctl enable mysql
   - sudo service mysql start
+  - sudo -E apt-get -yq --no-install-suggests --no-install-recommends $(travis_apt_get_options) install mysql-server-core-5.7 mysql-client-5.7 mysql-server-5.7
   # ODBC installation ini file
   - sudo cp $TRAVIS_BUILD_DIR/test/scripts/ci/odbcinst.ini /etc
 

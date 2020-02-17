@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+Released 2020-02-17
+
+Changes:
+- Fixes #96 by closing connections (https://github.com/CartoDB/odbc_fdw/pull/116).
+
 ## 0.5.0
 Released 2020-01-16
 
