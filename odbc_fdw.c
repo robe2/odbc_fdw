@@ -571,7 +571,7 @@ sql_data_type(
 		break;
 	case SQL_VARCHAR :
 	case SQL_WVARCHAR :
-		if (column_size <= 255)
+		if (column_size <= 255 && column_size > 0)
 		{
 			appendStringInfo(sql_type, "varchar(%u)", (unsigned)column_size);
 		}
