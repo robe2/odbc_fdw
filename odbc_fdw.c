@@ -1646,6 +1646,10 @@ odbcIterateForeignScan(ForeignScanState *node)
 			int mapped_pos = list_nth_int(col_position_mask, mask_index);
 			ColumnConversion conversion = list_nth_int(col_conversion_array, mask_index);
 
+			if (col_size == 0) {
+				col_size = 1024;
+			}
+
 			/* Ignore this column if position is marked as invalid */
 			if (mapped_pos == -1)
 				continue;
