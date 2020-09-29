@@ -571,7 +571,7 @@ sql_data_type(
 		break;
 	case SQL_VARCHAR :
 	case SQL_WVARCHAR :
-		if (column_size <= 255)
+		if (column_size <= 255 && column_size > 0)
 		{
 			appendStringInfo(sql_type, "varchar(%u)", (unsigned)column_size);
 		}
@@ -1645,6 +1645,10 @@ odbcIterateForeignScan(ForeignScanState *node)
 			int col_size = list_nth_int(col_size_array, mask_index);
 			int mapped_pos = list_nth_int(col_position_mask, mask_index);
 			ColumnConversion conversion = list_nth_int(col_conversion_array, mask_index);
+
+			if (col_size == 0) {
+				col_size = 1024;
+			}
 
 			/* Ignore this column if position is marked as invalid */
 			if (mapped_pos == -1)
