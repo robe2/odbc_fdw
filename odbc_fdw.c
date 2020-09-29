@@ -2139,7 +2139,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 			i = 0;
 			initStringInfo(&col_str);
 			ColumnName = (SQLCHAR *) palloc(sizeof(SQLCHAR) * MAXIMUM_COLUMN_NAME_LEN);
-			while (SQL_SUCCESS == ret)
+			while (SQL_NO_DATA != ret && SQL_SUCCESS_WITH_INFO != ret)
 			{
 				ret = SQLFetch(columns_stmt);
 				if (SQL_SUCCESS == ret)
@@ -2166,6 +2166,24 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 					}
 					appendStringInfo(&col_str, "\"%s\" %s", ColumnName, (char *) sql_type.data);
 				}
+				#ifdef DEBUG
+				if (ret == SQL_ERROR || ret == SQL_SUCCESS_WITH_INFO)
+				{
+					SQLINTEGER   j = 1;
+					SQLINTEGER   native;
+					SQLCHAR  state[ 7 ];
+					SQLCHAR  text[256];
+					SQLSMALLINT  len;
+					SQLRETURN    diag_ret;
+					do
+					{
+				        diag_ret = SQLGetDiagRec(SQL_HANDLE_STMT, columns_stmt, j++, state, &native, text, sizeof(text), &len);
+						if (SQL_SUCCEEDED(diag_ret))
+							elog(DEBUG1, "FETCHING %s:%ld:%ld:%s\n", state, (long int) j, (long int) native, text);
+					}
+					while( diag_ret == SQL_SUCCESS );
+				}
+				#endif
 			}
 			SQLCloseCursor(columns_stmt);
 			SQLFreeHandle(SQL_HANDLE_STMT, columns_stmt);
