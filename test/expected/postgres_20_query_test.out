@@ -11,7 +11,9 @@ SELECT * FROM query_postgres_test_table;
 (1 row)
 
 SELECT * FROM existent_table_in_schema_public;
-ERROR:  Executing ODBC query
+ERROR:  Executing ODBC query to get table size
+ERROR: relation "nonexistent_schema.existent_table_in_schema_public" does not exist;
+Error while executing the query
 SELECT * FROM test_table_in_schema;
  id |  data   
 ----+---------
