@@ -18,12 +18,13 @@ MODULE_big = odbc_fdw
 OBJS = odbc_fdw.o
 
 EXTENSION = odbc_fdw
-DATA = odbc_fdw--0.5.1.sql \
+DATA = odbc_fdw--0.5.2.sql \
   odbc_fdw--0.2.0--0.3.0.sql \
   odbc_fdw--0.2.0--0.4.0.sql \
   odbc_fdw--0.3.0--0.4.0.sql \
   odbc_fdw--0.4.0--0.5.0.sql \
-  odbc_fdw--0.5.0--0.5.1.sql
+  odbc_fdw--0.5.0--0.5.1.sql \
+  odbc_fdw--0.5.1--0.5.2.sql
 
 TEST_DIR = test/
 REGRESS = $(notdir $(basename $(sort $(wildcard $(TEST_DIR)/sql/*test.sql))))
