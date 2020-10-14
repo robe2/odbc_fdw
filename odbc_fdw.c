@@ -720,39 +720,50 @@ odbcGetTableOptions(Oid foreigntableid, odbcFdwOptions *extracted_options)
 	odbcGetOptions(table->serverid, table->options, extracted_options);
 }
 
+#define MAX_ERROR_MSG_LENGTH 512
+#define ERROR_MSG_SEP "\n"
+
 static void
 check_return(SQLRETURN ret, char *msg, SQLHANDLE handle, SQLSMALLINT type)
 {
+	static char error_msg[MAX_ERROR_MSG_LENGTH+1];
 	int err_code = ERRCODE_SYSTEM_ERROR;
 
-#ifdef DEBUG
+	strncpy(error_msg, msg, MAX_ERROR_MSG_LENGTH);
+
 	SQLINTEGER   i = 0;
 	SQLINTEGER   native;
 	SQLCHAR  state[ 7 ];
 	SQLCHAR  text[256];
 	SQLSMALLINT  len;
 	SQLRETURN    diag_ret;
+	#ifdef DEBUG
 	if (SQL_SUCCEEDED(ret))
-		elog(DEBUG1, "Successful result: %s", msg);
-#endif
+		elog(DEBUG1, "Successful result: %s", error_msg);
+	#endif
 
 	if (!SQL_SUCCEEDED(ret))
 	{
-#ifdef DEBUG
-		elog(DEBUG1, "Error result (%d): %s", ret, msg);
+		#ifdef DEBUG
+		elog(DEBUG1, "Error result (%d): %s", ret, error_msg);
+		#endif
 		if (handle)
 		{
 			do
 			{
 				diag_ret = SQLGetDiagRec(type, handle, ++i, state, &native, text,
 				                         sizeof(text), &len );
-				if (SQL_SUCCEEDED(diag_ret))
+				if (SQL_SUCCEEDED(diag_ret)) {
+					#ifdef DEBUG
 					elog(DEBUG1, " %s:%ld:%ld:%s\n", state, (long int) i, (long int) native, text);
+					#endif
+					strncat(error_msg, ERROR_MSG_SEP, MAX_ERROR_MSG_LENGTH - strlen(ERROR_MSG_SEP));
+					strncat(error_msg, text, MAX_ERROR_MSG_LENGTH - strlen(error_msg));
+				}
 			}
 			while( diag_ret == SQL_SUCCESS );
 		}
-#endif
-		ereport(ERROR, (errcode(err_code), errmsg("%s", msg)));
+		ereport(ERROR, (errcode(err_code), errmsg("%s", error_msg)));
 	}
 }
 
@@ -897,7 +908,7 @@ odbcGetTableSize(odbcFdwOptions* options, unsigned int *size)
 	elog_debug("Count query: %s", sql_str.data);
 
 	ret = SQLExecDirect(stmt, (SQLCHAR *) sql_str.data, SQL_NTS);
-	check_return(ret, "Executing ODBC query", stmt, SQL_HANDLE_STMT);
+	check_return(ret, "Executing ODBC query to get table size", stmt, SQL_HANDLE_STMT);
 	if (SQL_SUCCEEDED(ret))
 	{
 		SQLFetch(stmt);
@@ -1972,7 +1983,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 
 		/* Retrieve a list of rows */
 		ret = SQLExecDirect(query_stmt, (SQLCHAR *) options.sql_query, SQL_NTS);
-		check_return(ret, "Executing ODBC query", query_stmt, SQL_HANDLE_STMT);
+		check_return(ret, "Executing ODBC query to get schema", query_stmt, SQL_HANDLE_STMT);
 
 		SQLNumResultCols(query_stmt, &result_columns);
 
