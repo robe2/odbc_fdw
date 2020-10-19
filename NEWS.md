@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2
+Released 2020-10-14
+
+Changes:
+- Improve error messages (https://github.com/CartoDB/odbc_fdw/pull/126).
+- Add support for VARCHAR(0) (https://github.com/CartoDB/odbc_fdw/pull/125).
+- Fix missing columns problem (https://github.com/CartoDB/odbc_fdw/pull/123).
+
 ## 0.5.1
 Released 2020-02-17
 
