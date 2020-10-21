@@ -1950,6 +1950,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 	SQLLEN indicator;
 	const char* schema_name;
 	bool missing_foreign_schema = false;
+	bool first_column = true;
 
 	elog_debug("%s", __func__);
 
@@ -2008,10 +2009,15 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 				elog(NOTICE, "Data type not supported (%d) for column %s", DataType, ColumnName);
 				continue;
 			}
-			if (i > 1)
+			if (!first_column)
 			{
 				appendStringInfo(&col_str, ", ");
 			}
+			else
+			{
+				first_column = false;
+			}
+
 			appendStringInfo(&col_str, "\"%s\" %s", ColumnName, (char *) sql_type.data);
 		}
 		SQLCloseCursor(query_stmt);
