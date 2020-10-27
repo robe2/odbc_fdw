@@ -33,4 +33,4 @@ INSERT INTO test_schema.test_table_in_schema VALUES (1, 'example');
 -- To test reading variable size data
 CREATE TABLE postgres_var_test_table(varch text, varbin bytea);
 INSERT INTO postgres_var_test_table
-  SELECT string_agg(to_hex(n), ''), ('\x' || string_agg(to_hex(n),''))::bytea FROM generate_series(1,2000) n;
+  SELECT string_agg(to_hex(n), ''), ('\x' || string_agg(to_hex(n),''))::bytea FROM generate_series(1,3000) n;
