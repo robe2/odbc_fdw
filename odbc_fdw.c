@@ -1720,12 +1720,13 @@ odbcIterateForeignScan(ForeignScanState *node)
 				target_type	= SQL_C_BINARY;
 				binary_data = true;
 			}
-			chunk_size = binary_data ? col_size : col_size + 1;
 
 			if (col_size == 0)
 			{
 				col_size = 1024;
 			}
+
+			chunk_size = binary_data ? col_size : col_size + 1;
 
 			/* Ignore this column if position is marked as invalid */
 			if (mapped_pos == -1)
