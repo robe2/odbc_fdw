@@ -182,7 +182,7 @@ typedef enum { TEXT_CONVERSION, BIN_CONVERSION, BOOL_CONVERSION } ColumnConversi
 static GetDataTruncation
 result_truncation(SQLRETURN ret, SQLHSTMT stmt)
 {
-	SQLCHAR sqlstate[5];
+	SQLCHAR sqlstate[6];
 	GetDataTruncation truncation = NO_TRUNCATION;
 	if (ret == SQL_SUCCESS_WITH_INFO)
 	{
