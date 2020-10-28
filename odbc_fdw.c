@@ -182,39 +182,39 @@ typedef enum { TEXT_CONVERSION, BIN_CONVERSION, BOOL_CONVERSION } ColumnConversi
 static GetDataTruncation
 result_truncation(SQLRETURN ret, SQLHSTMT stmt)
 {
-    SQLCHAR sqlstate[5];
-    GetDataTruncation truncation = NO_TRUNCATION;
-    if (ret == SQL_SUCCESS_WITH_INFO)
-    {
+	SQLCHAR sqlstate[5];
+	GetDataTruncation truncation = NO_TRUNCATION;
+	if (ret == SQL_SUCCESS_WITH_INFO)
+	{
 		SQLGetDiagRec(SQL_HANDLE_STMT, stmt, 1, sqlstate, NULL, NULL, 0, NULL);
-        if (strcmp((char*)sqlstate, ODBC_SQLSTATE_STRING_TRUNCATION) == 0)
-        {
-            truncation = STRING_TRUNCATION;
-        }
+		if (strcmp((char*)sqlstate, ODBC_SQLSTATE_STRING_TRUNCATION) == 0)
+		{
+			truncation = STRING_TRUNCATION;
+		}
 		else if (strcmp((char*)sqlstate, ODBC_SQLSTATE_FRACTIONAL_TRUNCATION) == 0)
 		{
-            truncation = FRACTIONAL_TRUNCATION;
-        }
-    }
-    return truncation;
+			truncation = FRACTIONAL_TRUNCATION;
+		}
+	}
+	return truncation;
 }
 
 static void
 resize_buffer(char ** buffer, int *size, int used_size, int required_size)
 {
-    if (required_size > *size)
-    {
-        int new_size = required_size; // TODO: use min increment size, maybe in relation to current size
-        char * new_buffer = (char *) palloc(new_size);
-        // TODO: out of memory error if !new_buffer
-        if (used_size > 0)
-        {
-            memmove(new_buffer, *buffer, used_size);
-            pfree(*buffer);
-        }
-        *buffer = new_buffer;
-        *size = new_size;
-    }
+	if (required_size > *size)
+	{
+		int new_size = required_size; // TODO: use min increment size, maybe in relation to current size
+		char * new_buffer = (char *) palloc(new_size);
+		// TODO: out of memory error if !new_buffer
+		if (used_size > 0)
+		{
+			memmove(new_buffer, *buffer, used_size);
+			pfree(*buffer);
+		}
+		*buffer = new_buffer;
+		*size = new_size;
+	}
 }
 
 static const char * HEX_DIGITS = "0123456789ABCDEF";
@@ -1834,8 +1834,8 @@ odbcIterateForeignScan(ForeignScanState *node)
 						appendStringInfoString (&col_data, buffer);
 						break;
 					case BIN_CONVERSION :
-					    /* TODO: avoid hex conversion by building the tuple from Datum values instead of using BuildTupleFromCStrings */
-					    hex = binary_to_hex(buffer, used_buffer_size);
+						/* TODO: avoid hex conversion by building the tuple from Datum values instead of using BuildTupleFromCStrings */
+						hex = binary_to_hex(buffer, used_buffer_size);
 						appendStringInfoString (&col_data, "\\x");
 						appendStringInfoString (&col_data, hex);
 						pfree(hex);
