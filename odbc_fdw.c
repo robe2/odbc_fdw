@@ -1733,7 +1733,7 @@ odbcIterateForeignScan(ForeignScanState *node)
 			if (mapped_pos == -1)
 				continue;
 
-			while (1) // Reading loop for reading the field in chunks
+			do // Loop for reading the field in chunks
 			{
 				resize_buffer(&buffer, &buffer_size, used_buffer_size, used_buffer_size + chunk_size);
 				ret = SQLGetData(stmt, i, target_type, buffer + used_buffer_size, chunk_size, &result_size);
@@ -1786,14 +1786,12 @@ odbcIterateForeignScan(ForeignScanState *node)
 						buffer[used_buffer_size] = 0;
 					}
 					elog(NOTICE,"Truncating number: %s",buffer);
-					break;
 				}
 				else // NO_TRUNCATION: finish reading
 				{
 					used_buffer_size += effective_chunk_size;
-					break;
 				}
-			}
+			} while (truncation == STRING_TRUNCATION && chunk_size > 0);
 
 			if (!binary_data)
 			{
