@@ -110,6 +110,7 @@ PG_MODULE_MAGIC;
 
 #define ODBC_SQLSTATE_FRACTIONAL_TRUNCATION "01S07"
 #define ODBC_SQLSTATE_STRING_TRUNCATION "01004"
+#define ODBC_SQLSTATE_LENGTH 5
 typedef enum { NO_TRUNCATION, FRACTIONAL_TRUNCATION, STRING_TRUNCATION } GetDataTruncation;
 
 typedef struct odbcFdwOptions
@@ -182,16 +183,16 @@ typedef enum { TEXT_CONVERSION, BIN_CONVERSION, BOOL_CONVERSION } ColumnConversi
 static GetDataTruncation
 result_truncation(SQLRETURN ret, SQLHSTMT stmt)
 {
-	SQLCHAR sqlstate[6];
+	SQLCHAR sqlstate[ODBC_SQLSTATE_LENGTH + 1];
 	GetDataTruncation truncation = NO_TRUNCATION;
 	if (ret == SQL_SUCCESS_WITH_INFO)
 	{
 		SQLGetDiagRec(SQL_HANDLE_STMT, stmt, 1, sqlstate, NULL, NULL, 0, NULL);
-		if (strcmp((char*)sqlstate, ODBC_SQLSTATE_STRING_TRUNCATION) == 0)
+		if (strncmp((char*)sqlstate, ODBC_SQLSTATE_STRING_TRUNCATION, ODBC_SQLSTATE_LENGTH) == 0)
 		{
 			truncation = STRING_TRUNCATION;
 		}
-		else if (strcmp((char*)sqlstate, ODBC_SQLSTATE_FRACTIONAL_TRUNCATION) == 0)
+		else if (strncmp((char*)sqlstate, ODBC_SQLSTATE_FRACTIONAL_TRUNCATION, ODBC_SQLSTATE_LENGTH) == 0)
 		{
 			truncation = FRACTIONAL_TRUNCATION;
 		}
