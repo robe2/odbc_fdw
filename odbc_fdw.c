@@ -1785,7 +1785,7 @@ odbcIterateForeignScan(ForeignScanState *node)
 						resize_buffer(&buffer, &buffer_size, used_buffer_size, used_buffer_size + 1);
 						buffer[used_buffer_size] = 0;
 					}
-					elog(NOTICE,"Truncating number: %s",buffer);
+					elog_debug("Truncating number: %s", buffer);
 				}
 				else // NO_TRUNCATION: finish reading
 				{
