@@ -2,13 +2,17 @@
 function Merge-Tokens($template, $tokens)
 {
   return [regex]::Replace(
-    $template,
-    '\$\{(?<tokenName>\w+)\}',
-    {
-      param($match)
-      $tokenName = $match.Groups['tokenName'].Value
-      return $tokens[$tokenName]
-    })
+    [regex]::Replace(
+      $template,
+      '\$\{(?<tokenName>\w+)\}',
+      {
+        param($match)
+        $tokenName = $match.Groups['tokenName'].Value
+        return $tokens[$tokenName]
+      }),
+    '^-- ',
+    ''
+  )
 }
 
 # https://www.appveyor.com/docs/services-databases
