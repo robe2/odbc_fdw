@@ -16,4 +16,4 @@ IMPORT FOREIGN SCHEMA dbo
   OPTIONS(
     ApplicationIntent 'ReadOnly'
 );
--- NOTICE:  Data type not supported (-3) for column ignored
+-- !OUTPUT! NOTICE:  Data type not supported (-3) for column ignored
