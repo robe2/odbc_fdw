@@ -1789,7 +1789,7 @@ odbcIterateForeignScan(ForeignScanState *node)
 				}
 				else // NO_TRUNCATION: finish reading
 				{
-					used_buffer_size += effective_chunk_size;
+					used_buffer_size += result_size;
 				}
 			} while (truncation == STRING_TRUNCATION && chunk_size > 0);
 
