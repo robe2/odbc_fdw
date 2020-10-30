@@ -2,13 +2,33 @@
 function Merge-Tokens($template, $tokens)
 {
   return [regex]::Replace(
-    $template,
-    '\$\{(?<tokenName>\w+)\}',
-    {
-      param($match)
-      $tokenName = $match.Groups['tokenName'].Value
-      return $tokens[$tokenName]
-    })
+    [regex]::Replace(
+      $template,
+      '\$\{(?<tokenName>\w+)\}',
+      {
+        param($match)
+        $tokenName = $match.Groups['tokenName'].Value
+        return $tokens[$tokenName]
+      }),
+    '(?ms)^\-\-\s+\!OUTPUT\!\s+.*?$',
+    ''
+  )
+}
+
+function Merge-TokensExpected($template, $tokens)
+{
+  return [regex]::Replace(
+    [regex]::Replace(
+      $template,
+      '\$\{(?<tokenName>\w+)\}',
+      {
+        param($match)
+        $tokenName = $match.Groups['tokenName'].Value
+        return $tokens[$tokenName]
+      }),
+    '(?ms)^\-\-\s+\!OUTPUT\!\s+',
+    ''
+  )
 }
 
 # https://www.appveyor.com/docs/services-databases
@@ -43,8 +63,9 @@ $Config = @{
 foreach ($c in $Config.GetEnumerator()) {
   $tpl = Get-Content "$PSScriptRoot\template\$($c.Name)_installation_test.tpl" -Raw
   $generated_test = Merge-Tokens $tpl $($c.Value)
+  $generated_test_expected = Merge-TokensExpected $tpl $($c.Value)
   Set-Content -Path "$PSScriptRoot\sql/$($c.Name)_10_installation_test.sql" -Value $generated_test
-  Set-Content -Path "$PSScriptRoot\expected\$($c.Name)_10_installation_test.out" -Value $generated_test
+  Set-Content -Path "$PSScriptRoot\expected\$($c.Name)_10_installation_test.out" -Value $generated_test_expected
 }
 
 $env:Path += ";C:\Program Files\MySQL\MySQL Server 5.7\bin"

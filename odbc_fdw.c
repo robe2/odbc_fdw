@@ -1950,6 +1950,7 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 	SQLLEN indicator;
 	const char* schema_name;
 	bool missing_foreign_schema = false;
+	bool first_column = true;
 
 	elog_debug("%s", __func__);
 
@@ -2008,10 +2009,15 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 				elog(NOTICE, "Data type not supported (%d) for column %s", DataType, ColumnName);
 				continue;
 			}
-			if (i > 1)
+			if (!first_column)
 			{
 				appendStringInfo(&col_str, ", ");
 			}
+			else
+			{
+				first_column = false;
+			}
+
 			appendStringInfo(&col_str, "\"%s\" %s", ColumnName, (char *) sql_type.data);
 		}
 		SQLCloseCursor(query_stmt);
@@ -2055,9 +2061,10 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 				if (SQL_SUCCESS == ret)
 				{
 					int excluded = false;
+					SQLRETURN getdata_ret;
 					TableName = (SQLCHAR *) palloc(sizeof(SQLCHAR) * MAXIMUM_TABLE_NAME_LEN);
-					ret = SQLGetData(tables_stmt, SQLTABLES_NAME_COLUMN, SQL_C_CHAR, TableName, MAXIMUM_TABLE_NAME_LEN, &indicator);
-					check_return(ret, "Reading table name", tables_stmt, SQL_HANDLE_STMT);
+					getdata_ret = SQLGetData(tables_stmt, SQLTABLES_NAME_COLUMN, SQL_C_CHAR, TableName, MAXIMUM_TABLE_NAME_LEN, &indicator);
+					check_return(getdata_ret, "Reading table name", tables_stmt, SQL_HANDLE_STMT);
 
 					/* Since we're not filtering the SQLTables call by schema
 					   we must exclude here tables that belong to other schemas.
@@ -2066,8 +2073,8 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 					   So we only reject tables for which the schema is not
 					   blank and different from the desired schema:
 					 */
-					ret = SQLGetData(tables_stmt, SQLTABLES_SCHEMA_COLUMN, SQL_C_CHAR, table_schema, MAXIMUM_SCHEMA_NAME_LEN, &indicator);
-					if (SQL_SUCCESS == ret)
+					getdata_ret = SQLGetData(tables_stmt, SQLTABLES_SCHEMA_COLUMN, SQL_C_CHAR, table_schema, MAXIMUM_SCHEMA_NAME_LEN, &indicator);
+					if (SQL_SUCCESS == getdata_ret)
 					{
 						if (!is_blank_string((char*)table_schema) && strcmp((char*)table_schema, schema_name) )
 						{
