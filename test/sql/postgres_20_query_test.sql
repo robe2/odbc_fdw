@@ -8,3 +8,4 @@ SELECT * FROM ODBCQuerySize('postgres_fdw', 'select * from postgres_test_table')
 \x
 SELECT * FROM postgres_var_test_table;
 \x
+SELECT * FROM postgres_short_test_table;

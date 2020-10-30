@@ -30,7 +30,12 @@ CREATE TABLE test_schema.test_table_in_schema (
 );
 INSERT INTO test_schema.test_table_in_schema VALUES (1, 'example');
 
--- To test reading variable size data
+-- To test reading long variable size data (larger than chunk size)
 CREATE TABLE postgres_var_test_table(varch text, varbin bytea);
 INSERT INTO postgres_var_test_table
   SELECT string_agg(to_hex(n), ''), ('\x' || string_agg(to_hex(n),''))::bytea FROM generate_series(1,3000) n;
+
+-- To test reading short variable size data (shorter than chunk size)
+CREATE TABLE postgres_short_test_table(varch text, varbin bytea);
+INSERT INTO postgres_short_test_table
+  SELECT 'ABCDEFGHIJKLMNOPQRST123456'::text, '\x0701EF34A0A132979E23B3B017'::bytea;
