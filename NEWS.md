@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.2.1
+Released 2020-10-30
+
+Changes:
+- Fix potential privacy problem (https://github.com/CartoDB/odbc_fdw/pull/128).
+- Fix bug with ignored first column (https://github.com/CartoDB/odbc_fdw/pull/129).
+- Fix IMPORT SCHEMA not retrieving all tables (https://github.com/CartoDB/odbc_fdw/pull/129).
+- Check for errors while reading data (https://github.com/CartoDB/odbc_fdw/pull/130).
+- Support for VARBINAR (https://github.com/CartoDB/odbc_fdw/pull/131).
+
 ## 0.5.2
 Released 2020-10-14
 
