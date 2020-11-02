@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.2.2
+Released 2020-11-02
+
+Changes:
+- Fix bug with short binary data (https://github.com/CartoDB/odbc_fdw/pull/137).
+
 ## 0.5.2.1
 Released 2020-10-30
 
