@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.2.3
+Released 2020-11-09
+
+Changes:
+- Fix bug with data over 8192 bytes with some drivers (https://github.com/CartoDB/odbc_fdw/pull/138).
+
 ## 0.5.2.2
 Released 2020-11-02
 
